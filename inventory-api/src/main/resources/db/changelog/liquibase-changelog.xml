@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+    <!-- Profile table -->
+    <changeSet id="profile" author="Misael Lopez">
+        <createTable tableName="profile" remarks="Entity for Profile">
+            <column name="profile_id" type="int" autoIncrement="true">
+                <constraints nullable="false" unique="true" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Users table -->
+    <changeSet id="users" author="Misael Lopez">
+        <createTable tableName="users" remarks="Entity for user accounts">
+            <column name="user_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="email" type="varchar(70)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(1024)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="surname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="int"/>
+            <column name="phone" type="varchar(20)">|
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="profile_id" type="int">
+                <constraints nullable="true" foreignKeyName="fk_users_profile_id" references="profile(profile_id)"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Audit table -->
+    <changeSet id="audit" author="Misael Lopez">
+        <createTable tableName="audit" remarks="Entity for audit">
+            <column name="audit_id" type="int" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="entity" type="varchar(130)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operation" type="varchar(70)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request" type="jsonb"/>
+            <column name="response" type="jsonb"/>
+            <column name="http_status_code" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="url" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Roles table -->
+    <changeSet id="roles" author="Misael Lopez">
+        <createTable tableName="roles" remarks="Entity for roles">
+            <column name="role_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(80)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Roles_has_profile table -->
+    <changeSet id="profiles_roles" author="Misael Lopez">
+        <createTable tableName="profiles_roles" remarks="Relation for Profiles and Roles">
+            <column name="profile_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_roles_has_profile_profile" references="profile(profile_id)"/>
+            </column>
+            <column name="role_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_roles_has_profile_role" references="roles(role_id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Winery table-->
+    <changeSet id="winery" author="Misael Lopez">
+        <createTable tableName="winery" remarks="Entity for winery" >
+            <column name="winery_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true" />
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" />
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone" type="varchar(20)">
+                <constraints nullable="false"/> 
+            </column>
+            <column name="max_capacity" type="int" >
+                <constraints nullable="false" />
+            </column>
+            <column name="available_quantity" type="int" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_winery_user_id" references="users(user_id)"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Company table-->
+    <changeSet id="company" author="Misael Lopez">
+        <createTable tableName="company" remarks="Entity for company">
+            <column name="company_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Category table -->
+    <changeSet id="category" author="Misael Lopez">
+        <createTable tableName="category" remarks="Entity for category">
+            <column name="category_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product table -->
+    <changeSet id="product" author="Misael Lopez">
+        <createTable tableName="product" remarks="Entity for product">
+            <column name="product_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true" />
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_time" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bar_code" type="varchar(60)" >
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available_quantity" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="boolean" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_product_company_id" references="company(company_id)"/>
+            </column>
+            <column name="category_id" type="int" >
+                <constraints nullable="false" foreignKeyName="fk_product_category_id" references="category(category_id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- tokens table-->
+    <changeSet id="tokens" author="gerson chuquiej">
+        <createTable tableName="tokens">
+            <column name="token_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiracion" type="timestamp(6)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

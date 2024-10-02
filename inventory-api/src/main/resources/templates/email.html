@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .container-encabezado-token {
+            text-align: center;
+            background-color: #6c63ff;
+            padding: 20px;
+            font-size: 10px;
+            border-radius: 10px 10px 0 0;
+            color: white;
+        }
+
+        .container-cuerpo-email {
+            padding: 20px;
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .container-cuerpo-email p {
+            margin: 0 0 10px;
+        }
+
+        .email-footer-container {
+            text-align: center;
+            padding: 20px;
+            color: #888888;
+            font-size: 12px;
+        }
+
+        .email-footer-container p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-email-container">
+    <div class="container-encabezado-token">
+        <h1 th:text="${encabezado}+${token}"></h1>
+    </div>
+    <div class="container-cuerpo-email">
+        <p>Hola,</p>
+        <p th:text="${cuerpo}"></p>
+    </div>
+    <div class="email-footer-container">
+        <p>Este correo fue enviado automáticamente. Por favor, no respondas a este mensaje.</p>
+        <p>&copy; 2024 InventarioCompany sociedad anonima. Todos los derechos reservados.</p>
+    </div>
+</div>
+</body>
+</html>
