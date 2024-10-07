@@ -100,20 +100,24 @@ public class UserService {
         }
     }
 
-    public String passswordRandomAndSendEmail(RegisterUserDto registerUserDto) throws MessagingException {
-        final String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        final int defecto = 20;
-        Random random = new Random();
-        StringBuilder sb = new StringBuilder(defecto);
-        for(int i=0; i<defecto; i++){
-            int index = random.nextInt(caracteres.length());
-            sb.append(caracteres.charAt(index));
+    public String passswordRandomAndSendEmail(RegisterUserDto registerUserDto) {
+        try {
+            final String caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            final int defecto = 20;
+            Random random = new Random();
+            StringBuilder sb = new StringBuilder(defecto);
+            for(int i=0; i<defecto; i++){
+                int index = random.nextInt(caracteres.length());
+                sb.append(caracteres.charAt(index));
+            }
+            String cadenaAleatoria = sb.toString();
+
+            emailService.sendEmail(registerUserDto.getEmail(), registerUserDto.getName(), registerUserDto.getSurname(), cadenaAleatoria);
+
+            return cadenaAleatoria;
+        }catch (Exception e){
+            throw new RuntimeException("Error al generar password o mandar contraseña");
         }
-        String cadenaAleatoria = sb.toString();
-
-        emailService.sendEmail(registerUserDto.getEmail(), registerUserDto.getName(), registerUserDto.getSurname(), cadenaAleatoria);
-
-        return cadenaAleatoria;
 
     }
 

@@ -19,8 +19,6 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
 
-
-
     @Override
     public void sendEmail(EmailDto email, String token) throws MessagingException {
             try{
@@ -43,7 +41,7 @@ public class EmailServiceImpl implements EmailService {
                 javaMailSender.send(message);
 
             }catch (Exception e){
-                throw new RuntimeException("Error al enviar el email " + e.getMessage());
+                throw new RuntimeException("Error sending recovery email" + e.getMessage());
             }
 
     }
@@ -71,7 +69,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(message);
 
         }catch (Exception e){
-            throw new RuntimeException("Error al enviar el email " + e.getMessage());
+            throw new RuntimeException("Error sending random password" + e.getMessage());
         }
     }
 

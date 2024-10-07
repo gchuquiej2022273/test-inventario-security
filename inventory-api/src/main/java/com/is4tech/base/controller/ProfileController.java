@@ -27,7 +27,6 @@ public class ProfileController {
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createProfile(HttpServletRequest servletRequest, HttpServletResponse response, @RequestBody ProfileDto profileDto) {
         try {
-            auditService.createAudit(servletRequest, response, ENTIDAD,String.valueOf(profileDto) ,"Profile created successfully");
             Profile createdProfile = profileService.saveProfile(profileDto);
             Utilities.infoLog(servletRequest, HttpStatus.CREATED, "Profile created successfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Profile added successfully", createdProfile));

@@ -21,34 +21,32 @@ public class AuthenticationService {
     private final UserService userService;
 
     public User signup(RegisterUserDto input) {
-        try {
             validateRegisterInput(input);
 
             var passwordRandom = (input.getPassword() != null && !input.getPassword().isEmpty())
                     ? input.getPassword()
                     : userService.passswordRandomAndSendEmail(input);
+            try {
+                User user = new User();
+                user.setName(input.getName());
+                user.setSurname(input.getSurname());
+                user.setEmail(input.getEmail());
+                user.setUsername(input.getUsername());
+                user.setPassword(passwordEncoder.encode(passwordRandom));
+                user.setAge(input.getAge());
+                user.setPhone(input.getPhone());
 
-            User user = new User();
-            user.setName(input.getName());
-            user.setSurname(input.getSurname());
-            user.setEmail(input.getEmail());
-            user.setUsername(input.getUsername());
-            user.setPassword(passwordEncoder.encode(passwordRandom));
-            user.setAge(input.getAge());
-            user.setPhone(input.getPhone());
-
-            if (input.getProfileId() == null || input.getProfileId() == 0) {
-                user.setProfileId(1);
-            } else {
-                user.setProfileId(input.getProfileId());
+                if (input.getProfileId() == null || input.getProfileId() == 0) {
+                    user.setProfileId(1);
+                } else {
+                    user.setProfileId(input.getProfileId());
+                }
+                user.setStatus(true);
+                return userRepository.save(user);
+            }catch (Exception e){
+                throw new RuntimeException(e.getMessage());
             }
 
-            user.setStatus(true);
-
-            return userRepository.save(user);
-        }catch (Exception e){
-            throw new RuntimeException("Ocurrion un error al crear un usuario");
-        }
     }
 
     public User authenticate(LoginUserDto input) {

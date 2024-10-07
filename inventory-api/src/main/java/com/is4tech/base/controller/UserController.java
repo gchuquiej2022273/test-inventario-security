@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +39,7 @@ public class UserController {
             }
             User user = userOptional.get();
             String requestObject = user.getEmail();
+
             auditService.createAudit(request,response,ENTIDAD, requestObject, "Email enviado exitosamente");
             Tokens token = tokenRecoverPasswordService.generarTokenForRecoverPassword();
             emailService.sendEmail(email,token.getToken());
@@ -58,7 +58,7 @@ public class UserController {
             if (ok){
                 userService.updatePasswordByTokenMail(passwordDto);
             }else{
-                return ResponseEntity.badRequest().body(new ApiResponse("Token no valio o ha expirado",request.getMethod()));
+                return ResponseEntity.badRequest().body(new ApiResponse("Token no valio o ha expirado",passwordDto.getToken()));
             }
             auditService.createAudit(request,response,ENTIDAD, passwordDto.getNewPassword(), "Actualizacion correcta");
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse("Contraseña actualizada exitosamente.", passwordDto.getEmail()));

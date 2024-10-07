@@ -27,7 +27,6 @@ public class RoleController {
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createRole(HttpServletRequest servletRequest, HttpServletResponse response, @RequestBody RolesDto rolesDto) {
         try {
-            auditService.createAudit(servletRequest, response, ENTIDAD, String.valueOf(rolesDto), "Role created successfully");
             Roles createRole = rolesService.saveRoles(rolesDto);
             Utilities.infoLog(servletRequest, HttpStatus.CREATED, "Role created successfully");
             return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse("Role added successfully", createRole));
