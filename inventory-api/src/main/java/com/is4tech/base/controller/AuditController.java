@@ -5,23 +5,25 @@ import com.is4tech.base.dto.ApiResponse;
 import com.is4tech.base.service.AuditService;
 import com.is4tech.base.util.Utilities;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/audit")
+@RequiredArgsConstructor
 public class AuditController {
 
-    @Autowired
-    AuditService auditService;
+    private final AuditService auditService;
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<ApiResponse> getAuditorio(HttpServletRequest request){
         try{
             List<Audit> audits = auditService.getfindAudit();

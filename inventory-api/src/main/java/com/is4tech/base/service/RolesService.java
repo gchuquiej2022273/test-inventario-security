@@ -4,16 +4,16 @@ import com.is4tech.base.domain.Roles;
 import com.is4tech.base.dto.RolesDto;
 import com.is4tech.base.exception.Exceptions;
 import com.is4tech.base.repository.RolesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RolesService {
 
-    @Autowired
-    private  RolesRepository rolesRepository;
+    private final RolesRepository rolesRepository;
 
     public Roles saveRoles(RolesDto input) {
         if (input.getName() == null || input.getName().trim().isEmpty()) {

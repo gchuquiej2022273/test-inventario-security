@@ -42,6 +42,6 @@ public class Audit {
     @Column(name = "url", length = 255)
     private String url;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @Column(name = "username")
+    private String username;
 }

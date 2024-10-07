@@ -4,16 +4,16 @@ import com.is4tech.base.domain.Product;
 import com.is4tech.base.dto.ProductDto;
 import com.is4tech.base.exception.Exceptions;
 import com.is4tech.base.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public Product saveProduct(ProductDto input) {
         //llamamos el metodo para validar los campos

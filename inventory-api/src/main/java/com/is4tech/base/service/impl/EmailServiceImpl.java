@@ -4,6 +4,7 @@ import com.is4tech.base.dto.EmailDto;
 import com.is4tech.base.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -12,17 +13,13 @@ import org.thymeleaf.context.Context;
 
 
 @Service
+@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
 
-    TemplateEngine templateEngine;
 
-
-    public EmailServiceImpl(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
-        this.javaMailSender = javaMailSender;
-        this.templateEngine = templateEngine;
-    }
 
     @Override
     public void sendEmail(EmailDto email, String token) throws MessagingException {
@@ -38,9 +35,6 @@ public class EmailServiceImpl implements EmailService {
                 context.setVariable("encabezado", "Código de recuperación de contraseña es : ");
                 context.setVariable("token", token);
                 context.setVariable("cuerpo", "Si usted no solicitó la recuperación de contraseña notifique al administrador");
-                context.setVariable("button-text", "Recuperar contraseña");
-                context.setVariable("footer-one", "Este correo fue enviado automáticamente. Por favor, no respondas a este mensaje.");
-                context.setVariable("footer-two", "&copy; 2024 InventarioCompany sociedad anonima. Todos los derechos reservados.");
 
                 String contentHTML = templateEngine.process("email", context);
 
@@ -52,6 +46,33 @@ public class EmailServiceImpl implements EmailService {
                 throw new RuntimeException("Error al enviar el email " + e.getMessage());
             }
 
+    }
+
+    @Override
+    public void sendEmail(String email, String name, String surname, String randomPassword) throws MessagingException {
+        try{
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setFrom("brandomgomez59@gmail.com", "InventarioCorp");
+            helper.setSubject("¡Bienvenido(a) a InventarioCorp, " + name + "!");
+
+            Context context = new Context();
+            context.setVariable("encabezado", "¡Bienvenido(a) a [Inventario Corp], " + name + "!");
+            context.setVariable("name", name);
+            context.setVariable("passwordasig", "Tu contraseña asignada es la siguiente:");
+            context.setVariable("password", randomPassword);
+
+            String contentHTML = templateEngine.process("emailnewuser", context);
+
+            helper.setText(contentHTML, true);
+
+            javaMailSender.send(message);
+
+        }catch (Exception e){
+            throw new RuntimeException("Error al enviar el email " + e.getMessage());
+        }
     }
 
 }

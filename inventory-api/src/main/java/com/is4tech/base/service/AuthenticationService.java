@@ -5,43 +5,50 @@ import com.is4tech.base.dto.RegisterUserDto;
 import com.is4tech.base.domain.User;
 import com.is4tech.base.exception.Exceptions;
 import com.is4tech.base.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-
-    public AuthenticationService(
-            UserRepository userRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final UserService userService;
 
     public User signup(RegisterUserDto input) {
+        try {
+            validateRegisterInput(input);
 
-        validateRegisterInput(input);
+            var passwordRandom = (input.getPassword() != null && !input.getPassword().isEmpty())
+                    ? input.getPassword()
+                    : userService.passswordRandomAndSendEmail(input);
 
-        User user = new User();
-        user.setName(input.getName());
-        user.setSurname(input.getSurname());
-        user.setEmail(input.getEmail());
-        user.setUsername(input.getUsername());
-        user.setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setAge(input.getAge());
-        user.setPhone(input.getPhone());
-        user.setProfileId(input.getProfileId() > 0 ? input.getProfileId() : 1);
-        user.setStatus(true);
+            User user = new User();
+            user.setName(input.getName());
+            user.setSurname(input.getSurname());
+            user.setEmail(input.getEmail());
+            user.setUsername(input.getUsername());
+            user.setPassword(passwordEncoder.encode(passwordRandom));
+            user.setAge(input.getAge());
+            user.setPhone(input.getPhone());
 
-        return userRepository.save(user);
+            if (input.getProfileId() == null || input.getProfileId() == 0) {
+                user.setProfileId(1);
+            } else {
+                user.setProfileId(input.getProfileId());
+            }
+
+            user.setStatus(true);
+
+            return userRepository.save(user);
+        }catch (Exception e){
+            throw new RuntimeException("Ocurrion un error al crear un usuario");
+        }
     }
 
     public User authenticate(LoginUserDto input) {
@@ -71,9 +78,6 @@ public class AuthenticationService {
         }
         if (input.getUsername() == null || input.getUsername().trim().isEmpty()) {
             throw new Exceptions("Username cannot be empty");
-        }
-        if (input.getPassword() == null || input.getPassword().trim().isEmpty()) {
-            throw new Exceptions("Password cannot be empty");
         }
         if (input.getAge() == null ) {
             throw new Exceptions("Age cannot be empty");

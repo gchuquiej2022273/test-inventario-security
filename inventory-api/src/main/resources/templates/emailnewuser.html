@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .container-encabezado-token {
+            text-align: center;
+            background-color: #6c63ff;
+            padding: 20px;
+            font-size: 18px;
+            border-radius: 10px 10px 0 0;
+            color: white;
+        }
+
+        .container-encabezado-token h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .container-cuerpo-email {
+            padding: 20px;
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .container-cuerpo-email p {
+            margin: 0 0 10px;
+        }
+
+        .email-footer-container {
+            text-align: center;
+            padding: 20px;
+            color: #888888;
+            font-size: 12px;
+        }
+
+        .email-footer-container p {
+            margin: 0;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #6c63ff;
+        }
+
+    </style>
+</head>
+<body>
+<div class="dashboard-email-container">
+    <div class="container-encabezado-token">
+        <h1 th:text="${encabezado}"></h1>
+    </div>
+    <div class="container-cuerpo-email">
+        <p>¡Hola <span class="highlight" th:text="${name}"></span>!</p>
+        <p>Estamos muy emocionados de tenerte en <span class="highlight">[Inventario Corp]</span>. Tu cuenta ha sido creada exitosamente.</p>
+        <p th:text="${passwordasig}"></p>
+        <p><strong>Contraseña:</strong> <span class="highlight" th:text="${password}"></span></p>
+        <p>Si tienes alguna duda o necesitas asistencia, estamos aquí para ayudarte.</p>
+        <p>¡Bienvenido(a) a bordo!</p>
+    </div>
+    <div class="email-footer-container">
+        <p>Este correo fue enviado automáticamente. Por favor, no respondas a este mensaje.</p>
+        <p>&copy; 2024 InventarioCompany sociedad anonima. Todos los derechos reservados.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -4,16 +4,17 @@ import com.is4tech.base.domain.Company;
 import com.is4tech.base.dto.CompanyDto;
 import com.is4tech.base.exception.Exceptions;
 import com.is4tech.base.repository.CompanyRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CompanyService {
 
-    @Autowired
-    private  CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
 
     public Company saveCompany(CompanyDto input){
 

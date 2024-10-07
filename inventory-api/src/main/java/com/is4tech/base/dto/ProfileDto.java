@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileDto {
+    private Integer profileId;
     private String name;
     private String description;
     private Boolean status;

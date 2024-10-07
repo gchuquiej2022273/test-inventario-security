@@ -4,16 +4,16 @@ import com.is4tech.base.domain.Winery;
 import com.is4tech.base.dto.WineryDto;
 import com.is4tech.base.exception.Exceptions;
 import com.is4tech.base.repository.WineryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class WineryService {
 
-    @Autowired
-    private  WineryRepository wineryRepository;
+    private final WineryRepository wineryRepository;
 
     public Winery saveWinery(WineryDto input){
 
@@ -31,7 +31,7 @@ public class WineryService {
         return wineryRepository.save(winery);
     }
 
-    public Winery updateWinery(WineryDto input, Integer id) throws  Exception{
+    public Winery updateWinery(WineryDto input, Integer id) {
         Winery existinrWinery = wineryRepository.findById(id)
                 .orElseThrow(() -> new Exceptions("Winery not found"));
 

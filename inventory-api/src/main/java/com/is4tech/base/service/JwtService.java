@@ -30,7 +30,7 @@ public class JwtService {
     }
 
     public List<String> extractRoles(String token) {
-        return extractClaim(token, claims -> claims.get("resource", List.class));
+        return extractClaim(token, claims -> claims.get("roles", List.class));//Cambie el resource a roles
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -48,8 +48,8 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        final Integer userId = extractUserId(token); // Asegúrate de que extractUserId retorne Integer
-        final String email = extractEmail(token); // Agregar email si lo estás usando
+        final Integer userId = extractUserId(token);
+        final String email = extractEmail(token);
 
         return (username.equals(userDetails.getUsername()) &&
                 userId.equals(((User) userDetails).getId()) &&
@@ -61,7 +61,7 @@ public class JwtService {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("id", ((User) userDetails).getId());
         extraClaims.put("email", ((User) userDetails).getEmail());
-        extraClaims.put("resource", roles);
+        extraClaims.put("roles", roles);
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 

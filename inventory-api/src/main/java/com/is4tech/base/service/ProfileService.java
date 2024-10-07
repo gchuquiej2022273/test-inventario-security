@@ -10,6 +10,7 @@ import com.is4tech.base.repository.ProfileRepository;
 import com.is4tech.base.repository.ProfilesRolesRepository;
 import com.is4tech.base.repository.RolesRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
 
-    @Autowired
-    private ProfileRepository profileRepository;
-    @Autowired
-    private RolesRepository roleRepository;
-    @Autowired
-    private ProfilesRolesRepository profilesRolesRepository;
+    private final ProfileRepository profileRepository;
+    private final RolesRepository roleRepository;
+    private final ProfilesRolesRepository profilesRolesRepository;
 
     public Profile saveProfile(ProfileDto input) {
         validateProfileDto(input);
@@ -71,8 +70,8 @@ public class ProfileService {
                         .getRoleId())
                 .collect(Collectors.toList());
 
-        assignRolesToProfile(existingProfile.getProfileId(), roleIds); //Asignar roles al perfil actualizado
-        return profileRepository.save(existingProfile); // Guardar y retornar el perfil actualizado
+        assignRolesToProfile(existingProfile.getProfileId(), roleIds);
+        return profileRepository.save(existingProfile);
     }
 
     @Transactional

@@ -5,15 +5,13 @@ import com.is4tech.base.domain.User;
 import com.is4tech.base.dto.*;
 import com.is4tech.base.repository.UserRepository;
 import com.is4tech.base.service.*;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
+import com.is4tech.base.util.Utilities;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,98 +26,120 @@ public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenRecoverPasswordService tokenRecoverPasswordService;
-    private final String entidad = "user";
-    @Autowired
+    private static final String ENTIDAD = "user";
     private final AuditService auditService;
-    @Autowired
     private final UserService userService;
-    @Autowired
     private final EmailService emailService;
 
     @PostMapping("/recover-password")
-    public ResponseEntity<String> sendEmail(HttpServletRequest request, HttpServletResponse response, @RequestBody EmailDto email) {
+    public ResponseEntity<ApiResponse> sendEmail(HttpServletRequest request, HttpServletResponse response, @RequestBody EmailDto email) {
         try {
             Optional<User> userOptional = userRepository.findByEmail(email.getEmail());
             if (userOptional.isEmpty()) {
-                return ResponseEntity.badRequest().body("No se encontró un usuario con ese correo electrónico.");
+                return ResponseEntity.badRequest().body(new ApiResponse("User not found with email : ",email.getEmail()));
             }
-
             User user = userOptional.get();
             String requestObject = user.getEmail();
-            auditService.createAudit(request,response,entidad, requestObject, user.getId(), "Email enviado exitosamente");
-
+            auditService.createAudit(request,response,ENTIDAD, requestObject, "Email enviado exitosamente");
             Tokens token = tokenRecoverPasswordService.generarTokenForRecoverPassword();
             emailService.sendEmail(email,token.getToken());
-            return ResponseEntity.ok("Se ha enviado el código de recuperación de contraseña");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse("El token fue enviado con extito",user.getEmail()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al enviar el email.");
+            auditService.createAudit(request,response,ENTIDAD, "sendEmail", "Error al enviar correo de recuperacion!");
+            Utilities.errorLog(request, HttpStatus.INTERNAL_SERVER_ERROR, "Error al tratar de recuperar contraseña", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error al tratar de recuperar su contraseña", e.getMessage()));
         }
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<String> updatePasswowrd(HttpServletRequest request, HttpServletResponse response, @RequestBody PasswordDto passwordDto) {
+    public ResponseEntity<ApiResponse> updatePasswowrd(HttpServletRequest request, HttpServletResponse response, @RequestBody PasswordDto passwordDto) {
         try {
             boolean ok = tokenRecoverPasswordService.validarToken(passwordDto.getToken());
             if (ok){
                 userService.updatePasswordByTokenMail(passwordDto);
             }else{
-                return ResponseEntity.badRequest().body("Token inválido o ha expirado.");
+                return ResponseEntity.badRequest().body(new ApiResponse("Token no valio o ha expirado",request.getMethod()));
             }
-            auditService.createAudit(request,response,entidad, passwordDto.getNewPassword(), null, "Actualizacion correcta");
-            return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+            auditService.createAudit(request,response,ENTIDAD, passwordDto.getNewPassword(), "Actualizacion correcta");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse("Contraseña actualizada exitosamente.", passwordDto.getEmail()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Token inválido o ha expirado.");
+            auditService.createAudit(request,response,ENTIDAD, passwordDto.getEmail(), "Error al cambiar contraseña");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error al actualizar la contraseña", e.getMessage()));
         }
     }
 
     @PatchMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto request, Principal connectedUser) {
-
-        userService.changePassword(request, connectedUser);
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse> changePassword(@RequestBody ChangePasswordDto request, Principal principal, HttpServletRequest servletRequest, HttpServletResponse response) {
+        try {
+            auditService.createAudit(servletRequest, response, ENTIDAD, principal.getName(), "Contraseña actualizada exitosamente");
+            userService.changePassword(request);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse("Contraseña actualizada exitosamente", principal.getName()));
+        } catch (Exception e) {
+            auditService.createAudit(servletRequest, response, ENTIDAD, principal.getName(), "Error al cambiar la contraseña");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Ocurrió un error al tratar de actualizar la contraseña", e.getMessage()));
+        }
     }
 
+
     @GetMapping("/getUsers")
-    public List<User> getActivateUser(){
-        return this.userService.getUserStatusTrue();
+    public ResponseEntity<ApiResponse> getActivateUser(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            List<User> userList = userService.getUserStatusTrue();
+            auditService.createAudit(request, response, ENTIDAD, null, "Lista de usuarios activos obtenida correctamente");
+            Utilities.infoLog(request, HttpStatus.OK, "Fetched users list");
+            return ResponseEntity.ok(new ApiResponse("Fetched users list", userList));
+        } catch (Exception e) {
+            auditService.createAudit(request, response, ENTIDAD, null, "Error al obtener la lista de usuarios activos");
+            Utilities.errorLog(request, HttpStatus.INTERNAL_SERVER_ERROR, "Error getting users", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error getting users", e.getMessage()));
+        }
     }
 
     @GetMapping("/{userId}")
-    public Optional<User> getUserById(@PathVariable("userId") Integer userId){
-        return this.userService.getById(userId);
+    public ResponseEntity<ApiResponse> getUserById(HttpServletRequest request, HttpServletResponse response, @PathVariable("userId") Integer userId) {
+        try {
+            User user = userService.getById(userId);
+            Utilities.infoLog(request, HttpStatus.OK, "User found with ID: " + userId);
+            return ResponseEntity.ok(new ApiResponse("User successfully obtained", user));
+        } catch (Exception e) {
+            auditService.createAudit(request, response, ENTIDAD, userId.toString(), "Error al obtener el usuario");
+            Utilities.errorLog(request, HttpStatus.INTERNAL_SERVER_ERROR, "Error getting user", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error getting user", e.getMessage()));
+        }
     }
 
     @PutMapping("/{userId}")
-    public User updateUserById(HttpServletRequest request, HttpServletResponse response,@RequestBody User user, @PathVariable("userId") Integer userId){
-
+    public ResponseEntity<ApiResponse> updateUserById(HttpServletRequest request, HttpServletResponse response,@RequestBody UserDto userDto, @PathVariable("userId") Integer userId){
         try{
-            String requestObject = user.getSurname();
-            auditService.createAudit(request,response,entidad, requestObject, user.getId(), "Actualizacion correcta");
+            auditService.createAudit(request,response,ENTIDAD, String.valueOf(userDto),"Actualizacion correcta");
 
-            return this.userService.updateById(user, userId);
+            User user = userService.updateById(userDto, userId);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ApiResponse("update successful", user));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            auditService.createAudit(request,response,ENTIDAD, String.valueOf(userDto),"Error updating user by id");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Error updating user", e.getMessage()));
         }
     }
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteById(@PathVariable("userId") Integer userId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse> deleteById(@PathVariable("userId") Integer userId, HttpServletRequest request, HttpServletResponse response) {
         try {
             boolean ok = userService.deleteUserById(userId);
             String responseMessage;
 
             if (ok) {
                 responseMessage = "User with id: " + userId + " Deleted";
-                auditService.createAudit(request, response, entidad, "Eliminación de usuario con id: " + userId, userId, responseMessage);
+                auditService.createAudit(request, response, ENTIDAD, "Eliminación de usuario con id: " + userId,responseMessage);
             } else {
                 responseMessage = "Error, we have a problem deleting the user: " + userId;
-                return ResponseEntity.badRequest().body(responseMessage);
+                return ResponseEntity.badRequest().body(new ApiResponse(responseMessage, null));
             }
 
-            return ResponseEntity.ok(responseMessage);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(responseMessage, userId));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al eliminar el usuario.");
+            auditService.createAudit(request, response, ENTIDAD, "Eliminación de usuario con id: " + userId,"Error trying to delete user");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse("Ocurrió un error al eliminar el usuario", e.getMessage()));
         }
     }
 }

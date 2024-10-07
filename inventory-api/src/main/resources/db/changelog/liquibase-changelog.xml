@@ -74,15 +74,15 @@
             <column name="operation" type="varchar(70)">
                 <constraints nullable="false"/>
             </column>
-            <column name="request" type="jsonb"/>
-            <column name="response" type="jsonb"/>
+            <column name="request" type="varchar(255)"/>
+            <column name="response" type="varchar(255)"/>
             <column name="http_status_code" type="int">
                 <constraints nullable="false"/>
             </column>
             <column name="url" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="user_id" type="int">
+            <column name="username" type="varchar(80)">
             </column>
         </createTable>
     </changeSet>

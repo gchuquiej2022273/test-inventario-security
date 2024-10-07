@@ -9,6 +9,7 @@ import com.is4tech.base.dto.ProfileHasRoleDTO;
 import com.is4tech.base.repository.ProfileHasRoleRepository;
 import com.is4tech.base.repository.ProfileRepository;
 import com.is4tech.base.repository.RolesRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,18 +18,13 @@ import java.util.stream.Collectors;
 
 
 @Service
+@RequiredArgsConstructor
 public class ProfileHasRoleService {
 
-    @Autowired
-    private ProfileHasRoleRepository profileHasRoleRepository;
 
-    @Autowired
-    private RolesRepository rolesRepository;
-
-    @Autowired
-    private ProfileRepository profileRepository;
-
-
+    private final ProfileHasRoleRepository profileHasRoleRepository;
+    private final RolesRepository rolesRepository;
+    private final ProfileRepository profileRepository;
 
     public ProfileHasRoleDTO createProfileHasRole(ProfileHasRoleCreateDto dto) {
         Profile profile = profileRepository.findById(dto.getProfileId())

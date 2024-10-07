@@ -8,8 +8,10 @@ import com.is4tech.base.service.AuditService;
 import com.is4tech.base.service.AuthenticationService;
 import com.is4tech.base.service.JwtService;
 import com.is4tech.base.service.ProfileService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,25 +23,18 @@ import java.util.List;
 
 @RequestMapping("/api/auth")
 @RestController
+@RequiredArgsConstructor
 public class AuthenticationController {
     private final JwtService jwtService;
     private final String entidad="signup";
     private final AuditService auditService;
-
-    @Autowired
-    private ProfileService profileService;
+    private final ProfileService profileService;
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(JwtService jwtService, AuditService auditService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.auditService = auditService;
-        this.authenticationService = authenticationService;
-    }
-
     @PostMapping("/signup")
-    public ResponseEntity<User> register(HttpServletRequest request, HttpServletResponse response, @RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<User> register(HttpServletRequest request, HttpServletResponse response, @RequestBody RegisterUserDto registerUserDto){
         User registeredUser = authenticationService.signup(registerUserDto);
-        auditService.createAudit(request,response,entidad, String.valueOf(registeredUser), null, "Registro user exitoso");
+        auditService.createNewUserAudit(request,response,entidad,registerUserDto,"Registro user exitoso");
         return ResponseEntity.ok(registeredUser);
     }
 
